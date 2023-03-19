@@ -31,6 +31,10 @@ I learned that us can use a Terraform module to condense the amount of code in t
 > #### 2. https://github.com/kubernetes/kubernetes/blob/8eda21ea3f1c2a95581e8b48b6333d600e7ecda4/cmd/kubeadm/app/util/runtime/runtime.go#L196-L229 </br>
 > Fix for multiple socket error. I decided to edit the config file to allow cri-dockerd as the default socket.
 
+> #### https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/ </br>
+> HA Topoogy: Stacked etcd
+
+
 ### Networking
 
 > #### 1. https://kubernetes.io/docs/reference/networking/ports-and-protocols/ </br>

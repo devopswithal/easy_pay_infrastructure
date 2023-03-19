@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cap-cars-app
+spec:
+  selector:
+    matchLabels:
+      app: cap-cars-frontend
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: cap-cars-frontend
+    spec:
+      containers:
+        - name: cap-cars-frontend
+          image: cap-cars-app:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom :
+                configMapKeyRef :
+                  name : cap-db-config
+                  key :  host
+
+            - name: DB_NAME
+              valueFrom :
+                configMapKeyRef :
+                  name : cap-db-config
+                  key :  dbName
+
+            - name: DB_USERNAME
+              valueFrom :
+                secretKeyRef :
+                  name : cap-cars-secrets
+                  key :  username
+
+            - name: DB_PASSWORD
+              valueFrom :
+                secretKeyRef :
+                  name : cap-cars-secrets
+                  key :  password
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cap-cars-app-svc
+spec:
+  selector:
+    app: cap-cars-frontend
+  ports:
+    - protocol: "TCP"
+      port: 8080
+      targetPort: 8080
+  type: NodePort

@@ -1,0 +1,7 @@
+apiVersion : v1
+kind : ConfigMap
+metadata:
+  name : cap-db-config
+data:
+  host : cap-cars-db
+  dbName: capcarsdb
