@@ -13,3 +13,4 @@ resource "aws_key_pair" "ep_cap_ssh" {
   key_name        = "ep_cap_ssh"
   public_key      = tls_private_key.ssh.public_key_openssh
 }
+

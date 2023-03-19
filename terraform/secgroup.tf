@@ -96,6 +96,13 @@ resource "aws_security_group" "master_nodes" {
     protocol  = "tcp"
     cidr_blocks = ["${var.vpc_cidr}"]
   }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "worker_nodes" {
@@ -117,5 +124,12 @@ resource "aws_security_group" "worker_nodes" {
     to_port     = 32767
     protocol    = "tcp"
     cidr_blocks = ["${var.vpc_cidr}"]
+  }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }

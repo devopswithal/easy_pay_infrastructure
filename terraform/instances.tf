@@ -1,6 +1,6 @@
 # Bastion
 resource "aws_instance" "bastion" {
-  ami                         = "var.ami_id"
+  ami                         = var.ami_id
   instance_type               = "t3.micro"
   subnet_id                   = module.vpc.public_subnets[0]
   associate_public_ip_address = "true"
@@ -29,8 +29,8 @@ resource "aws_instance" "bastion" {
 resource "aws_instance" "master_nodes" {
   count                      = var.master_node_count
   ami                        = var.ami_id
-  instance_type              = "t3.micro"
-  subnet_id                  = "${element(module.vpc.private_subnets, count.index)}"
+  instance_type              = "t3.small"
+  subnet_id                  = element(module.vpc.private_subnets, count.index)
   key_name                   = aws_key_pair.ep_cap_ssh.key_name
   security_groups            = [aws_security_group.cluster_nodes.id, aws_security_group.master_nodes.id]
 
@@ -44,7 +44,7 @@ resource "aws_instance" "worker_nodes" {
   count                      = var.worker_node_count
   ami                        = var.ami_id
   instance_type              = "t3.micro"
-  subnet_id                  = "${element(module.vpc.private_subnets, count.index)}"
+  subnet_id                  = element(module.vpc.private_subnets, count.index)
   key_name                   = aws_key_pair.ep_cap_ssh.key_name
   security_groups            = [aws_security_group.cluster_nodes.id, aws_security_group.worker_nodes.id]
 

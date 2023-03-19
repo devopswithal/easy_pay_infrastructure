@@ -1,0 +1,5 @@
+terraform.tfstate
+terraform.tfstate.backup
+yum-key.gpg
+ansible_plays/cluster_config.yml.back
+ep_cap_ssh.pem

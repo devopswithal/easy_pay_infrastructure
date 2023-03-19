@@ -22,10 +22,6 @@ resource "null_resource" "provisioner" {
     "always_run"      = timestamp()
   }
 
-  provisioner "local-exec" {
-    command           = "until curl --output /dev/null --silent --head --fail http://${aws_instance.bastion.public_ip}:22; do sleep 10; done"
-  }
-
   provisioner "file" {
     source            = "${path.root}/inventory"
     destination       = "/home/ubuntu/inventory"
@@ -42,17 +38,16 @@ resource "null_resource" "provisioner" {
 }
 
 resource "local_file" "ansible_vars_file" {
-  content = <<-DOC
-        master_lb: ${aws_lb.ep_cap_lb.dns_name}
+    content = <<-DOC
+        master_lb: ${aws_lb.ep_masters_lb.dns_name}
         DOC
-  filename = "ansible/ansible_vars_file.yml"
+    filename = "ansible_plays/ansible_vars_file.yml"
 }
 
 resource "null_resource" "copy_ansible_playbooks" {
   depends_on = [
     null_resource.provisioner,
     aws_instance.bastion,
-    local_file.ansible_vars_file
   ]
 
   triggers = {
@@ -60,8 +55,8 @@ resource "null_resource" "copy_ansible_playbooks" {
   }
 
   provisioner "file" {
-    source            = "${path.root}/ansible"
-    destination       = "/home/ubuntu/ansible/"
+    source            = "${path.root}/ansible_plays"
+    destination       = "/home/ubuntu/ansible_plays/"
 
     connection {
       type            = "ssh"
@@ -101,7 +96,7 @@ resource "null_resource" "run_ansible" {
   provisioner "remote-exec" {
     inline = [
       "echo 'starting ansible playbooks...'",
-      "sleep 60 && ansible-playbook -i /home/ubuntu/inventory /home/ubuntu/ansible/play.yml ",
+      "sleep 60 && ansible-playbook -i /home/ubuntu/inventory /home/ubuntu/ansible_plays/cluster_config.yml ",
     ]
   }
 }
