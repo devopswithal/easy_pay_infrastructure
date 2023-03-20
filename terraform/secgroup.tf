@@ -23,6 +23,11 @@ resource "aws_security_group" "ssh_access" {
     protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "${var.stack}-bastion_ssh"
+  }
+
 }
 
 resource "aws_security_group" "alb_sg" {
@@ -31,23 +36,9 @@ resource "aws_security_group" "alb_sg" {
   vpc_id = module.vpc.vpc_id
 
   ingress {
-    from_port = 80
-    to_port   = 80
-    protocol  = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port = 443
-    to_port   = 443
-    protocol  = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port = 8080
-    to_port   = 8089
-    protocol  = "tcp"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -64,6 +55,11 @@ resource "aws_security_group" "alb_sg" {
     protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "${var.stack}-alb"
+  }
+
 }
 
 resource aws_security_group "mysql" {
@@ -84,6 +80,11 @@ resource aws_security_group "mysql" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "${var.stack}-mysql"
+  }
+
 }
 
 resource "aws_security_group" "cluster_nodes" {
@@ -110,6 +111,10 @@ resource "aws_security_group" "cluster_nodes" {
     to_port   = 0
     protocol  = "-1"
     cidr_blocks = [var.vpc_cidr]
+  }
+
+  tags = {
+    Name = "${var.stack}-cluster_ssh"
   }
 }
 
@@ -158,11 +163,23 @@ resource "aws_security_group" "master_nodes" {
     cidr_blocks = [var.vpc_cidr]
   }
 
+  ingress {
+    # HTTP
+    from_port   = 8080
+    to_port     = 8089
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
   egress {
     from_port = 0
     to_port   = 0
     protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.stack}-master_nodes"
   }
 }
 
@@ -187,10 +204,22 @@ resource "aws_security_group" "worker_nodes" {
     cidr_blocks = [var.vpc_cidr]
   }
 
+  ingress {
+    # HTTP
+    from_port   = 8080
+    to_port     = 8089
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
   egress {
     from_port = 0
     to_port   = 0
     protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.stack}-worker_nodes"
   }
 }

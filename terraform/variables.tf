@@ -3,6 +3,11 @@ variable "AWS_REGION" {
   default = "us-east-1"
 }
 
+variable stack {
+  description = "this is name for tags"
+  default     = "Terraform"
+}
+
 variable "ami_id" {
   type    = string
   default = "ami-0fd2c44049dd805b8"

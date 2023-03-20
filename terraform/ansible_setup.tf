@@ -70,6 +70,32 @@ resource "null_resource" "copy_ansible_playbooks" {
   }
 }
 
+resource "null_resource" "copy_kubernetes_manifests" {
+  depends_on = [
+    null_resource.provisioner,
+    aws_instance.bastion,
+  ]
+
+  triggers = {
+    "always_run"      = timestamp()
+  }
+
+  provisioner "file" {
+    source            = "${path.root}/kubernetes"
+    destination       = "/home/ubuntu/kubernetes/"
+
+    connection {
+      type            = "ssh"
+      host            = aws_instance.bastion.public_ip
+      user            = var.ssh_user
+      private_key     = tls_private_key.ssh.private_key_pem
+      insecure        = true
+      agent           = false
+    }
+
+  }
+}
+
 resource "null_resource" "run_ansible" {
   depends_on = [
     null_resource.provisioner,

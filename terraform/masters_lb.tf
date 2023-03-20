@@ -8,6 +8,7 @@ resource "aws_lb" "ep_masters_lb" {
 
   tags = {
     Environment = "dev"
+    Name = "${var.stack}-master_lb"
   }
 }
 

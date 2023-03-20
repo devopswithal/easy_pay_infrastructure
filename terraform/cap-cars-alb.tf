@@ -18,17 +18,6 @@ resource "aws_lb" "cap-cars-alb" {
   }
 }
 
-resource "aws_lb_listener" "front_end_80" {
-  load_balancer_arn = aws_lb.cap-cars-alb.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.front-end.arn
-  }
-}
-
 resource "aws_lb_listener" "front_end_8080" {
   load_balancer_arn = aws_lb.cap-cars-alb.arn
   port              = "8080"
@@ -42,13 +31,13 @@ resource "aws_lb_listener" "front_end_8080" {
 
 resource "aws_lb_target_group" "front-end" {
   name        = "front-end"
-  port        = 80
+  port        = 8080
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = module.vpc.vpc_id
 
   health_check {
-    port      = 80
+    port      = 8080
     protocol  = "TCP"
     interval  = 30
     healthy_threshold = 2
