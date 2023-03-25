@@ -45,12 +45,6 @@ resource "aws_lb_target_group" "front-end" {
   }
 }
 
-resource "aws_lb_target_group_attachment" "master_lb_attach" {
-  count            = length(aws_instance.master_nodes)
-  target_group_arn = aws_lb_target_group.front-end.arn
-  target_id        = element(aws_instance.master_nodes.*.private_ip, count.index)
-}
-
 resource "aws_lb_target_group_attachment" "worker_lb_attach" {
   count            = length(aws_instance.worker_nodes)
   target_group_arn = aws_lb_target_group.front-end.arn

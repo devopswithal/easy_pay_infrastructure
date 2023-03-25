@@ -171,6 +171,30 @@ resource "aws_security_group" "master_nodes" {
     cidr_blocks = [var.vpc_cidr]
   }
 
+  ingress {
+    # BGP Peering
+    from_port   = 179
+    to_port     = 179
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  ingress {
+    # Calico Node to Node
+    from_port   = 5743
+    to_port     = 5743
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  ingress {
+    # Calico Felix
+    from_port   = 9099
+    to_port     = 9099
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
   egress {
     from_port = 0
     to_port   = 0
@@ -208,6 +232,30 @@ resource "aws_security_group" "worker_nodes" {
     # HTTP
     from_port   = 8080
     to_port     = 8089
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  ingress {
+    # BGP Peering
+    from_port   = 179
+    to_port     = 179
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  ingress {
+    # Calico Node to Node
+    from_port   = 5743
+    to_port     = 5743
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  ingress {
+    # Calico Felix
+    from_port   = 9099
+    to_port     = 9099
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }

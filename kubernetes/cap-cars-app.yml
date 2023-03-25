@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: cap-cars-frontend
-          image: cap-cars-app:1.0
+          image: devopswithal/cap-cars-app:1.0
           ports:
             - containerPort: 8080
           env:

@@ -4,7 +4,7 @@ resource "aws_lb" "ep_masters_lb" {
   load_balancer_type = "network"
   subnets            = module.vpc.private_subnets
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags = {
     Environment = "dev"

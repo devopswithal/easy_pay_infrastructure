@@ -16,5 +16,6 @@ module "vpc" {
   tags = {
     Terraform             = "true"
     Environment           = "dev"
+    Name                  = "${var.stack}-vpc"
   }
 }
