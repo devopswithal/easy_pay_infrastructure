@@ -5,3 +5,4 @@
 /capstone-app/target/maven-status/
 /capstone-app/target/surefire-reports/
 /capstone-app/target/test-classes/
+/.idea/
