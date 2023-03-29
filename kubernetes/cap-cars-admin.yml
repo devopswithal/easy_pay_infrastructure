@@ -7,14 +7,3 @@ rules:
   - apiGroups: ["", "extensions", "apps"]
     resources: ["pods"]
     verbs: ["create","get", "list", "update", "delete"]
-
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  namespace: cap-cars-db
-  name: cluster-admin
-rules:
-  - apiGroups: ["", "extensions", "apps"]
-    resources: ["pods"]
-    verbs: ["create","get", "list", "update", "delete"]

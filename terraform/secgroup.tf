@@ -181,8 +181,8 @@ resource "aws_security_group" "master_nodes" {
 
   ingress {
     # Calico Node to Node
-    from_port   = 5743
-    to_port     = 5743
+    from_port   = 5473
+    to_port     = 5473
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }
@@ -194,6 +194,15 @@ resource "aws_security_group" "master_nodes" {
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }
+
+  ingress {
+    # HTTPS
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
 
   egress {
     from_port = 0
@@ -237,6 +246,14 @@ resource "aws_security_group" "worker_nodes" {
   }
 
   ingress {
+    # HTTPS
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  ingress {
     # BGP Peering
     from_port   = 179
     to_port     = 179
@@ -246,8 +263,8 @@ resource "aws_security_group" "worker_nodes" {
 
   ingress {
     # Calico Node to Node
-    from_port   = 5743
-    to_port     = 5743
+    from_port   = 5473
+    to_port     = 5473
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }

@@ -90,6 +90,7 @@
       name: cri-docker.socket
       state: started
       enabled: yes
+
 ##
 
 ### Master Node Configurations
@@ -103,6 +104,11 @@
        name: kubectl
        state: present
        force: yes
+
+   - name: Install Bird
+     apt:
+       name: bird
+       state: present
 
    - name: Start the cluster
      shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --cri-socket unix:///run/cri-dockerd.sock --control-plane-endpoint "{{ master_lb }}":6443 --upload-certs >> cluster.txt
@@ -136,12 +142,20 @@
        owner: ubuntu
      when: k8s_conf.stat.exists
 
-   - name: Install Pod network
+   - name: Install Calico Operators
      become_user: ubuntu
-     shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml >> pod_setup.txt
+     shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml >> pod_setup.txt
      args:
        chdir: $HOME
        creates: pod_setup.txt
+
+   - name: Install Calico Network
+     become_user: ubuntu
+     shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml >> pod_setup2.txt
+     args:
+       chdir: $HOME
+       creates: pod_setup2.txt
+
 
    - name: get default kubeadm config
      shell: kubeadm config print init-defaults > kubeadm_config.yaml
@@ -188,6 +202,11 @@
        state: present
        force: yes
 
+   - name: Install Bird
+     apt:
+       name: bird
+       state: present
+
    - name: Copy the master join command to server location
      copy: src=join_command dest=/tmp/join_command.sh mode=0777
 
@@ -231,6 +250,11 @@
 - hosts: workers
   become: yes
   tasks:
+    - name: Install Bird
+      apt:
+        name: bird
+        state: present
+
     - name: Copy the worker join command to server location
       copy: src=join_node_command dest=/tmp/join_node_command.sh mode=0777
 
