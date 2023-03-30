@@ -40,7 +40,7 @@ variable "master_node_count" {
 
 variable "worker_node_count" {
   type    = number
-  default = 9
+  default = 3
 }
 
 variable "ssh_user" {

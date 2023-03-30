@@ -44,6 +44,8 @@ resource "local_file" "ansible_vars_file" {
     filename = "ansible_plays/ansible_vars_file.yml"
 }
 
+
+
 resource "null_resource" "copy_ansible_playbooks" {
   depends_on = [
     null_resource.provisioner,
@@ -104,6 +106,7 @@ resource "null_resource" "run_ansible" {
     aws_instance.worker_nodes,
     module.vpc,
     aws_instance.bastion,
+    local_file.ansible_vars_file
   ]
 
   triggers = {
