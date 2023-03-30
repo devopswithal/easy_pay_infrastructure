@@ -91,6 +91,11 @@
       state: started
       enabled: yes
 
+   - name: Install Bird
+     apt:
+       name: bird
+       state: present
+
 ##
 
 ### Master Node Configurations
@@ -104,11 +109,6 @@
        name: kubectl
        state: present
        force: yes
-
-   - name: Install Bird
-     apt:
-       name: bird
-       state: present
 
    - name: Start the cluster
      shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --cri-socket unix:///run/cri-dockerd.sock --control-plane-endpoint "{{ master_lb }}":6443 --upload-certs >> cluster.txt
@@ -202,11 +202,6 @@
        state: present
        force: yes
 
-   - name: Install Bird
-     apt:
-       name: bird
-       state: present
-
    - name: Copy the master join command to server location
      copy: src=join_command dest=/tmp/join_command.sh mode=0777
 
@@ -250,11 +245,6 @@
 - hosts: workers
   become: yes
   tasks:
-    - name: Install Bird
-      apt:
-        name: bird
-        state: present
-
     - name: Copy the worker join command to server location
       copy: src=join_node_command dest=/tmp/join_node_command.sh mode=0777
 
