@@ -2,8 +2,7 @@ resource "aws_lb" "cap-cars-alb" {
   name               = "cap-cars-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [module.vpc.public_subnets]
+  subnets            = module.vpc.public_subnets
 
   enable_deletion_protection = true
 

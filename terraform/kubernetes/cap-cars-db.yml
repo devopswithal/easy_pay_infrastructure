@@ -4,7 +4,7 @@ metadata:
   name: cap-cars-pv-claim
   namespace: cap-cars-app
   labels:
-    app: cap-cars-db
+    app: mysql
     tier: database
 spec:
   accessModes:
@@ -17,27 +17,27 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cap-cars-db
+  name: mysql
   namespace: cap-cars-app
   labels:
-    app: cap-cars-db
+    app: mysql
     tier: database
 spec:
   selector:
     matchLabels:
-      app: cap-cars-db
+      app: mysql
       tier: database
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: cap-cars-db
+        app: mysql
         tier: database
     spec:
       containers:
         - image: mysql
-          name: cap-cars-db
+          name: mysql
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom :
@@ -50,11 +50,9 @@ spec:
                 configMapKeyRef :
                   name : cap-db-config
                   key :  dbName
-
-
           ports:
             - containerPort: 3306
-              name: cap-cars-db
+              name: mysql
           volumeMounts:
             - name: cap-cars-pv
               mountPath: /var/lib/mysql
@@ -67,16 +65,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cap-cars-db
+  name: mysql
   namespace: cap-cars-app
   labels:
-    app: cap-cars-db
+    app: mysql
     tier: database
 spec:
   ports:
     - port: 3306
       targetPort: 3306
   selector:
-    app: cap-cars-db
+    app: mysql
     tier: database
   clusterIP: None

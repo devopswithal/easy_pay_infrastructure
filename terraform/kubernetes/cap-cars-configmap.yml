@@ -4,5 +4,5 @@ metadata:
   name: cap-db-config
   namespace: cap-cars-app
 data:
-  host: cap-cars-db
+  host: msql
   dbName: capcarsdb
