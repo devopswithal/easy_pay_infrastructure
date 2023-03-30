@@ -56,10 +56,10 @@ spec:
             - containerPort: 3306
               name: cap-cars-db
           volumeMounts:
-            - name: cap-cars-persistent-storage
+            - name: cap-cars-pv
               mountPath: /var/lib/mysql
       volumes:
-        - name: cap-cars-persistent-storage
+        - name: cap-cars-pv
           persistentVolumeClaim:
             claimName: cap-cars-pv-claim
 
