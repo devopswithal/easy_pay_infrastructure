@@ -1,4 +1,40 @@
-resource "aws_lb" "ep_masters_lb" {
+module "control_plane_nlb" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 8.0"
+
+  name = "ep-cap-nlb"
+
+  load_balancer_type = "network"
+  enable_deletion_protection = false
+
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.vpc.private_subnets
+
+  access_logs = {
+    bucket = "ep-cluster-state-store"
+  }
+
+  target_groups = [
+    {
+      name_prefix      = "tg-"
+      backend_protocol = "TCP"
+      backend_port     = 6443
+      target_type      = "ip"
+      vpc_id = module.vpc.vpc_id
+    }
+  ]
+
+  http_tcp_listeners = [
+    {
+      port               = 6443
+      protocol           = "TCP"
+      target_group_index = 0
+    }
+  ]
+
+  tags = local.common_tags
+}
+/*resource "aws_lb" "ep_masters_lb" {
   name               = "ep-masters-lb"
   internal           = true
   load_balancer_type = "network"
@@ -8,7 +44,7 @@ resource "aws_lb" "ep_masters_lb" {
 
   tags = {
     Environment = "dev"
-    Name = "${var.stack}-master_lb"
+    Name = "${var.cluster_name}-master_lb"
   }
 }
 
@@ -45,4 +81,5 @@ resource "aws_lb_target_group_attachment" "master_lb_attach" {
   target_id        = element(aws_instance.master_nodes.*.private_ip, count.index)
   port             = 8080
 }
+*/
 

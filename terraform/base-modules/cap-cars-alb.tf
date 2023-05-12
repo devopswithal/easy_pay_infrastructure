@@ -1,10 +1,55 @@
-resource "aws_lb" "cap-cars-alb" {
+module "ingress_alb" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 8.0"
+
+  name = "ep-cap-alb"
+
+  load_balancer_type = "application"
+  enable_deletion_protection = false
+
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.vpc.private_subnets
+
+  access_logs = {
+    bucket = "ep-cluster-state-store"
+  }
+
+  target_groups = [
+    {
+      name_prefix      = "albtg-"
+      backend_protocol = "TCP"
+      backend_port     = 8080
+      target_type      = "ip"
+      vpc_id = module.vpc.vpc_id
+    }
+  ]
+
+  http_tcp_listeners = [
+    {
+      port               = 80
+      protocol           = "TCP"
+      target_group_index = 0
+    }
+  ]
+
+  http_tcp_listeners = [
+    {
+      port               = 8080
+      protocol           = "TCP"
+      target_group_index = 0
+    }
+  ]
+
+  tags = local.common_tags
+}
+
+/*resource "aws_lb" "cap-cars-alb" {
   name               = "cap-cars-lb"
   internal           = false
   load_balancer_type = "application"
   subnets            = module.vpc.public_subnets
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags = {
     Environment = "dev"
@@ -36,3 +81,4 @@ resource "aws_lb_target_group_attachment" "worker_lb_attach" {
   target_id        = element(aws_instance.worker_nodes.*.private_ip, count.index)
   port             = 8080
 }
+*/
