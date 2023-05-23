@@ -6,3 +6,7 @@
 /capstone-app/target/surefire-reports/
 /capstone-app/target/test-classes/
 /.idea/
+/terraform/base-module/.terraform/
+/terraform/backend/.terraform/
+/terraform/backend/backend.tfplan
+/terraform/backend/.terraform.lock.hcl

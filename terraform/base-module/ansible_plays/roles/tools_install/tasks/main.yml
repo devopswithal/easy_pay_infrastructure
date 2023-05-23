@@ -1,0 +1,81 @@
+### https://docs.docker.com/engine/install/ubuntu/
+- name: Install Dependencies
+  ansible.builtin.apt:
+    name: "{{ dependencies }}"
+    state: present
+
+- name: Update Cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Keyring Directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Install Docker GPG Key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+    force: true
+
+- name: Install Docker Repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    filename: /etc/apt/sources.list.d/docker
+    state: present
+    update_cache: true
+
+- name: Install Docker Bundle
+  ansible.builtin.apt:
+    name: "{{ docker }}"
+    state: present
+
+###
+- name: Add Kubernetes GPG Key
+  become: yes
+  ansible.builtin.get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: /etc/apt/keyrings/kubernetes-archive-keyring.asc
+    mode: '0644'
+    force: true
+
+- name: Sleep for 20 seconds
+  ansible.builtin.wait_for:
+    timeout: 20
+
+- name: Verify presence of GPG Key
+  become: yes
+  ansible.builtin.stat:
+    path: /etc/apt/keyrings/kubernetes-archive-keyring.asc
+  register: gpg_key
+
+- name: Add Kubernetes Repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.asc] https://apt.kubernetes.io/ kubernetes-xenial main"
+    filename: /etc/apt/sources.list.d/kubernetes.list
+    state: present
+  when: gpg_key.stat.exists
+
+- name: Update Cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Kubernetes Bundle Install
+  ansible.builtin.apt:
+    name: "{{ kubernetes }}"
+    state: present
+
+- name: Start and Enable the cri-dockerd service - containerd.service
+  ansible.builtin.systemd:
+    name: containerd.service
+    state: started
+    enabled: yes
+
+- name: Install network tools
+  ansible.builtin.apt:
+    name: "{{ net }}"
+    state: present

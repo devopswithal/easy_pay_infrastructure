@@ -1,0 +1,5 @@
+- name: copy k8s manifest files
+  ansible.builtin.copy:
+    src: /home/ubuntu/kubernetes
+    dest: /home/ubuntu/kubernetes
+  ignore_errors: true

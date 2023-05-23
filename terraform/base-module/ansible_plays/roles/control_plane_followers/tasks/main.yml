@@ -1,0 +1,45 @@
+- name: Kubectl Install
+  ansible.builtin.apt:
+    name: kubectl
+    state: present
+    force: yes
+
+- name: Copy the master join command to server location
+  ansible.builtin.copy:
+    src: cp_join_command
+    dest: /tmp/cp_join_command.sh
+    mode: '0777'
+
+- name: Add cri socket to kubelet
+  ansible.builtin.replace:
+    path: /tmp/cp_join_command.sh
+    regexp: "--token"
+    replace: "--cri-socket='unix:///run/cri-dockerd.sock' --token"
+
+- name: Join the master node to cluster
+  ansible.builtin.command: sh /tmp/cp_join_command.sh
+
+- name: Sleep for 20 seconds
+  ansible.builtin.wait_for:
+    timeout: 20
+
+- name: Create .kube directory
+  become: yes
+  become_user: ubuntu
+  ansible.builtin.file:
+    path: $HOME/.kube
+    state: directory
+    mode: '0755'
+
+- name: Check admin.conf file exists.
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kube_conf
+
+- name: Copy admin.conf to user's kube config
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+  when: kube_conf.stat.exists

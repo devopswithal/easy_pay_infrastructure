@@ -1,0 +1,63 @@
+---
+### Install Dependencies, Docker, & Kubernetes
+- hosts: all
+  become: yes
+  vars:
+   - dependencies:
+       - ca-certificates
+       - curl
+       - gnupg
+       - apt-transport-https
+   - docker:
+       - docker-ce
+       - docker-ce-cli
+       - containerd.io
+       - docker-buildx-plugin
+       - docker-compose-plugin
+   - kubernetes:
+       - kubeadm
+       - kubectl
+       - kubelet
+   - net:
+       - net-tools
+       - dnsutils
+       - traceroute
+       - mtr-tiny
+       - telnet
+  roles:
+    - tools_install
+    - ipv4_config
+    - cri-dockerd_config
+##
+
+- hosts: control-plane
+  become: yes
+  roles:
+    - k8s_manifests
+
+### Master Node Configurations
+- hosts: control-plane-leader
+  become: yes
+  vars_files:
+    - ansible_vars_file.yml
+  roles:
+    - control_plane_leader
+##
+
+
+#### Configure other master nodes
+- hosts: control-plane-followers
+  become: yes
+  vars_files:
+    - ansible_vars_file.yml
+  roles:
+    - control_plane_followers
+##
+
+
+##### Worker Node Configurations
+- hosts: workers
+  become: yes
+  roles:
+    - worker_nodes
+##
