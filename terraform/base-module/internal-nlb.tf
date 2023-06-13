@@ -1,40 +1,3 @@
-/*module "control_plane_nlb" {
-  source  = "terraform-aws-modules/alb/aws"
-  version = "~> 8.0"
-
-  name = "ep-cap-nlb"
-
-  load_balancer_type = "network"
-  enable_deletion_protection = false
-
-  vpc_id  = module.vpc.vpc_id
-  subnets = module.vpc.private_subnets
-
-  access_logs = {
-    bucket = "ep-cluster-state-store"
-  }
-
-  target_groups = [
-    {
-      name_prefix      = "tg-"
-      backend_protocol = "TCP"
-      backend_port     = 6443
-      target_type      = "ip"
-      vpc_id = module.vpc.vpc_id
-    }
-  ]
-
-  http_tcp_listeners = [
-    {
-      port               = 6443
-      protocol           = "TCP"
-      target_group_index = 0
-    }
-  ]
-
-  tags = local.common_tags
-}*/
-
 resource "aws_lb" "control_plane_nlb" {
   name               = "control-plane-nlb"
   internal           = true
@@ -43,7 +6,9 @@ resource "aws_lb" "control_plane_nlb" {
 
   enable_deletion_protection = false
 
-  tags = local.common_tags
+  tags = {
+    "kubernetes.io/cluster/kubernetes" = "owned"
+  }
 }
 
 resource "aws_lb_target_group" "cplane_tg" {
@@ -60,6 +25,9 @@ resource "aws_lb_target_group" "cplane_tg" {
     healthy_threshold = 2
     unhealthy_threshold = 2
   }
+  tags = {
+    "kubernetes.io/cluster/kubernetes" = "owned"
+  }
 }
 
 resource "aws_lb_listener" "control_plane_nlb_listener" {
@@ -70,6 +38,9 @@ resource "aws_lb_listener" "control_plane_nlb_listener" {
   default_action {
     target_group_arn = aws_lb_target_group.cplane_tg.id
     type = "forward"
+  }
+  tags = {
+    "kubernetes.io/cluster/kubernetes" = "owned"
   }
 }
 

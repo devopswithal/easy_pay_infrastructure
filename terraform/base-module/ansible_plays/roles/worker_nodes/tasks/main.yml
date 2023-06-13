@@ -1,3 +1,9 @@
+- name: Add kubelet extra args
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    insertafter: \[Service\]
+    line: Environment="KUBELET_EXTRA_ARGS=--resolv-conf=/run/systemd/resolve/resolv.conf --cloud-provider=external"
+
 - name: Copy the join command for worker nodes
   ansible.builtin.copy:
     src: node_join_command
@@ -8,7 +14,11 @@
   ansible.builtin.replace:
     path: /tmp/node_join_command.sh
     regexp: "--token"
-    replace: "--cri-socket='unix:///run/cri-dockerd.sock' --token"
+    replace: "--cri-socket='unix:///run/containerd/containerd.sock' --token"
 
 - name: Join the worker node to cluster
-  ansible.builtin.command: sh /tmp/node_join_command.sh
+  ansible.builtin.command:
+    cmd: sh /tmp/node_join_command.sh >> workers_complete.txt
+  args:
+    chdir: /tmp/
+    creates: workers_complete.txt

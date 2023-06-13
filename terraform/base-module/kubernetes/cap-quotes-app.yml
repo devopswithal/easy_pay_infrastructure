@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cap-quotes-app
+  namespace: cap-quotes-app
+spec:
+  selector:
+    matchLabels:
+      app: cap-quotes-frontend
+      tier: frontend
+      role: frontend
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: cap-quotes-frontend
+        tier: frontend
+        role: frontend
+    spec:
+      hostname: cap-quotes-app
+      containers:
+        - name: cap-quotes-frontend
+          image: devopswithal/cap-quotes-app:2.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: cap-quotes-secrets
+                  key: host
+
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: cap-quotes-secrets
+                  key: dbName
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cap-quotes-secrets
+                  key: username
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cap-quotes-secrets
+                  key: password
+          resources:
+            limits:
+              cpu: 100m
+            requests:
+              cpu: 50m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cap-quotes-frontend
+  namespace: cap-quotes-app
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: alb
+spec:
+  selector:
+    app: cap-quotes-frontend
+    tier: frontend
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer

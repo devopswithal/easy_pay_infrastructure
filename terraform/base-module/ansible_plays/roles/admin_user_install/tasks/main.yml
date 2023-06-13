@@ -1,0 +1,22 @@
+- name: Make admin directory
+  ansible.builtin.file:
+    path: $HOME/admin/
+    state: directory
+
+- name: Copy the cluster-admin-conf all cluster nodes
+  ansible.builtin.copy:
+    src: ./cluster-admin-conf
+    dest: $HOME/admin/cluster-admin-conf
+    mode: '0600'
+
+- name: Copy the cluster-admin.key to all cluster nodes
+  ansible.builtin.copy:
+    src: ./cluster-admin.key
+    dest: $HOME/admin/cluster-admin.key
+    mode: '0600'
+
+- name: Copy the cluster-admin.crt to all cluster nodes
+  ansible.builtin.copy:
+    src: ./cluster-admin.crt
+    dest: $HOME/admin/cluster-admin.crt
+    mode: '0600'

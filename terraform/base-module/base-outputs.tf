@@ -51,18 +51,71 @@ output "ec2_bastion_public_ip" {
   value       = aws_eip.bastion_eip.public_ip
 }
 
+###############################################################
+# Cluster Outputs
+
 output "cluster_keypair" {
   description = "Keypair for ssh access"
   value = tls_private_key.ssh.private_key_pem
   sensitive = true
 }
 
-/*output "cp_instances" {
+output "cp_instances_one" {
   description = "Control plane instance attributes"
-  value = module.control_instance
+  value = aws_instance.control_instance[0].private_ip
 }
 
-output "worker_instances" {
+output "cp_instances_two" {
+  description = "Control plane instance attributes"
+  value = aws_instance.control_instance[1].private_ip
+}
+
+output "cp_instances_three" {
+  description = "Control plane instance attributes"
+  value = aws_instance.control_instance[2].private_ip
+}
+
+output "worker_instances_one" {
   description = "Worker node instance attributes"
-  value = module.worker_instance
-}*/
+  value = aws_instance.worker_instance[0].public_ip
+}
+
+output "worker_instances_two" {
+  description = "Worker node instance attributes"
+  value = aws_instance.worker_instance[1].public_ip
+}
+
+output "worker_instances_three" {
+  description = "Worker node instance attributes"
+  value = aws_instance.worker_instance[2].public_ip
+}
+
+output "control_instance_azs_one" {
+  description = "Availability zones for instances"
+  value = aws_instance.control_instance[0].availability_zone
+}
+
+output "control_instance_azs_two" {
+  description = "Availability zones for instances"
+  value = aws_instance.control_instance[1].availability_zone
+}
+
+output "control_instance_azs_three" {
+  description = "Availability zones for instances"
+  value = aws_instance.control_instance[2].availability_zone
+}
+
+output "worker_instance_azs_one" {
+  description = "Availability zones for instances"
+  value = aws_instance.worker_instance[0].availability_zone
+}
+
+output "worker_instance_azs_two" {
+  description = "Availability zones for instances"
+  value = aws_instance.worker_instance[1].availability_zone
+}
+
+output "worker_instance_azs_three" {
+  description = "Availability zones for instances"
+  value = aws_instance.worker_instance[2].availability_zone
+}

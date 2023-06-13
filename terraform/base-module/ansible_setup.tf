@@ -2,12 +2,12 @@
 resource "local_file" "ansible_inventory" {
   content             = templatefile("${path.root}/templates/inventory.tftpl",
     {
-      control-plane-dns     = aws_instance.control_instance.*.private_dns,
-      control-plane-ip      = aws_instance.control_instance.*.private_ip,
-      control-plane-id      = aws_instance.control_instance.*.id,
-      worker-node-dns       = aws_instance.worker_instance.*.private_dns,
-      worker-node-ip        = aws_instance.worker_instance.*.private_ip,
-      worker-node-id        = aws_instance.worker_instance.*.id
+      control-plane-dns       = aws_instance.control_instance.*.private_dns,
+      control-plane-ip        = aws_instance.control_instance.*.private_ip,
+      control-plane-id        = aws_instance.control_instance.*.id,
+      worker-node-dns         = aws_instance.worker_instance.*.private_dns,
+      worker-node-ip          = aws_instance.worker_instance.*.private_ip,
+      worker-node-id          = aws_instance.worker_instance.*.id
     }
   )
   filename            = "${path.root}/ansible_hosts"
@@ -97,6 +97,7 @@ resource "null_resource" "provisioner" {
 resource "local_file" "ansible_vars_file" {
     content = <<-DOC
         control_plane_lb: ${aws_lb.control_plane_nlb.dns_name}
+        control_plane_leader_ip: "${aws_instance.control_instance[0].private_ip}"
         DOC
     filename = "ansible_plays/ansible_vars_file.yml"
 }
@@ -166,4 +167,3 @@ resource "null_resource" "run_ansible" {
     ]
   }
 }
-

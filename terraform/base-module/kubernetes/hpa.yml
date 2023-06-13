@@ -1,13 +1,26 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: cap-cars-hpa
-  namespace: cap-cars-app
+  name: cap-quotes-hpa
+  namespace: cap-quotes-app
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: cap-cars-app
+    name: cap-quotes-app
   minReplicas: 1
   maxReplicas: 20
-  targetCPUUtilizationPercentage: 50
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15

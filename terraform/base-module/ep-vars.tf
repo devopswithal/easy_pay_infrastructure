@@ -29,7 +29,7 @@ variable "business_divsion" {
 variable "vpc_name" {
   description = "VPC Name"
   type = string
-  default = "ep-eks-vpc"
+  default = "ep-quotes-vpc"
 }
 
 # VPC CIDR Block
@@ -66,27 +66,6 @@ variable "vpc_private_subnets" {
   type = list(string)
   default = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 }
-
-/*# VPC Database Subnets
-variable "vpc_database_subnets" {
-  description = "VPC Database Subnets"
-  type = list(string)
-  default = ["10.0.21.0/24", "10.0.22.0/24", "10.0.23.0/24"]
-}
-
-# VPC Create Database Subnet Group (True / False)
-variable "vpc_create_database_subnet_group" {
-  description = "VPC Create Database Subnet Group"
-  type = bool
-  default = true
-}
-
-# VPC Create Database Subnet Route Table (True or False)
-variable "vpc_create_database_subnet_route_table" {
-  description = "VPC Create Database Subnet Route Table"
-  type = bool
-  default = true
-}*/
 
 # VPC Enable NAT Gateway (True or False)
 variable "vpc_enable_nat_gateway" {
@@ -144,7 +123,7 @@ variable "ami_id" {
   default = "ami-0aa2b7722dc1b5612"
 }
 
-variable "master_node_count" {
+variable "control_plane_count" {
   description = "Count of control planes to be provisioned"
   type    = number
   default = 3

@@ -1,7 +1,7 @@
 ---
 ### Install Dependencies, Docker, & Kubernetes
 - hosts: all
-  become: yes
+  become: true
   vars:
    - dependencies:
        - ca-certificates
@@ -22,42 +22,59 @@
        - net-tools
        - dnsutils
        - traceroute
-       - mtr-tiny
        - telnet
+       - tshark
   roles:
     - tools_install
-    - ipv4_config
-    - cri-dockerd_config
+    - vm_setup
+    #- cri-dockerd_config
 ##
 
+### Copy Kubernetes Manifest Files
 - hosts: control-plane
-  become: yes
+  become: true
   roles:
     - k8s_manifests
 
 ### Master Node Configurations
 - hosts: control-plane-leader
-  become: yes
+  become: true
   vars_files:
     - ansible_vars_file.yml
   roles:
     - control_plane_leader
 ##
 
-
-#### Configure other master nodes
+### Configure other master nodes
 - hosts: control-plane-followers
-  become: yes
+  become: true
   vars_files:
     - ansible_vars_file.yml
   roles:
     - control_plane_followers
 ##
 
-
-##### Worker Node Configurations
+### Worker Node Configurations
 - hosts: workers
-  become: yes
+  become: true
   roles:
     - worker_nodes
 ##
+
+### Create Admin User and Install and Configure App
+- hosts: control-plane-leader
+  become: true
+  roles:
+    - admin_user_creation
+
+- hosts:
+    - control-plane-followers
+    - workers
+  become: true
+  roles:
+    - admin_user_install
+
+- hosts: control-plane-leader
+  become: true
+  roles:
+    - install_app

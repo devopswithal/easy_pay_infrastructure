@@ -10,3 +10,4 @@
 /terraform/backend/.terraform/
 /terraform/backend/backend.tfplan
 /terraform/backend/.terraform.lock.hcl
+/capstone-app/

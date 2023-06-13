@@ -4,7 +4,13 @@
     state: present
     force: yes
 
-- name: Copy the master join command to server location
+- name: Add kubelet extra args
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    insertafter: \[Service\]
+    line: Environment="KUBELET_EXTRA_ARGS=--resolv-conf=/run/systemd/resolve/resolv.conf --cloud-provider=external"
+
+- name: Copy the control-plane join command to control-plane-followers
   ansible.builtin.copy:
     src: cp_join_command
     dest: /tmp/cp_join_command.sh
@@ -14,18 +20,21 @@
   ansible.builtin.replace:
     path: /tmp/cp_join_command.sh
     regexp: "--token"
-    replace: "--cri-socket='unix:///run/cri-dockerd.sock' --token"
+    replace: "--cri-socket='unix:///run/containerd/containerd.sock' --v=10 --token > control_plane_followers.txt"
 
-- name: Join the master node to cluster
-  ansible.builtin.command: sh /tmp/cp_join_command.sh
+- name: Join the control-plane-followers node to cluster
+  ansible.builtin.command:
+    cmd: sh /tmp/cp_join_command.sh >> followers_complete.txt
+  register: result
+  args:
+    chdir: /tmp/
+    creates: followers_complete.txt
 
 - name: Sleep for 20 seconds
   ansible.builtin.wait_for:
     timeout: 20
 
 - name: Create .kube directory
-  become: yes
-  become_user: ubuntu
   ansible.builtin.file:
     path: $HOME/.kube
     state: directory
@@ -39,7 +48,6 @@
 - name: Copy admin.conf to user's kube config
   ansible.builtin.copy:
     src: /etc/kubernetes/admin.conf
-    dest: /home/ubuntu/.kube/config
+    dest: $HOME/.kube/config
     remote_src: yes
-    owner: ubuntu
   when: kube_conf.stat.exists

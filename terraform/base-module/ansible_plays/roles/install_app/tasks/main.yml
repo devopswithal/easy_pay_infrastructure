@@ -1,0 +1,46 @@
+- name: Download metrics server yaml file
+  ansible.builtin.get_url:
+    url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    dest: $HOME/components.yml
+
+- name: Disable tls authentications # after original line 139
+  ansible.builtin.lineinfile:
+    path: $HOME/components.yml
+    insertafter: "        - --metric-resolution=15s"
+    line: "        - --kubelet-insecure-tls"
+
+- name: Install metrics server
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/components.yml --kubeconfig=$HOME/admin/cluster-admin-conf
+
+- name: Create db configmap
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/mysql-configmap.yml --kubeconfig=$HOME/admin/cluster-admin-conf
+
+- name: Create app secrets
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-secrets.yml --kubeconfig=$HOME/admin/cluster-admin-conf
+
+- name: Create persistent volume
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-pv.yml --kubeconfig=$HOME/admin/cluster-admin-conf
+
+- name: Create deployment for db pods
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-db.yml --kubeconfig=$HOME/admin/cluster-admin-conf
+
+- name: Sleep for 30 seconds
+  ansible.builtin.wait_for:
+    timeout: 30
+
+- name: Create deployment for app pods
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-app.yml --kubeconfig=$HOME/admin/cluster-admin-conf
+
+- name: Create db ingress network policy
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-net.yml --kubeconfig=$HOME/admin/cluster-admin-conf
+
+- name: Create deploy horizontal pod autoscaler
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/hpa.yml --kubeconfig=$HOME/admin/cluster-admin-conf

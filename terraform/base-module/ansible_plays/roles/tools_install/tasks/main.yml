@@ -1,3 +1,7 @@
+- name: Set hostnames
+  ansible.builtin.shell:
+    cmd: hostnamectl set-hostname "{{ inventory_hostname }}"
+
 ### https://docs.docker.com/engine/install/ubuntu/
 - name: Install Dependencies
   ansible.builtin.apt:
@@ -8,6 +12,7 @@
   ansible.builtin.apt:
     update_cache: true
 
+### Docker
 - name: Install Keyring Directory
   ansible.builtin.file:
     path: /etc/apt/keyrings
@@ -33,9 +38,34 @@
     name: "{{ docker }}"
     state: present
 
-###
-- name: Add Kubernetes GPG Key
+- name: Enable Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+
+### CNI Plugins
+- name: Make CNI directory
+  ansible.builtin.file:
+    path: /opt/cni/bin
+    state: directory
+
+- name: Download CNI plugins archive
   become: yes
+  get_url:
+    url: https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
+    dest: /tmp/cni-plugins-linux-amd64-v1.1.1.tgz
+
+- name: Extract CNI plugins archive
+  become: yes
+  unarchive:
+    src: /tmp/cni-plugins-linux-amd64-v1.1.1.tgz
+    dest: /opt/cni/bin
+    remote_src: yes
+    extra_opts: "-z"
+
+### Kubernetes
+- name: Add Kubernetes GPG Key
   ansible.builtin.get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     dest: /etc/apt/keyrings/kubernetes-archive-keyring.asc
@@ -47,13 +77,11 @@
     timeout: 20
 
 - name: Verify presence of GPG Key
-  become: yes
   ansible.builtin.stat:
     path: /etc/apt/keyrings/kubernetes-archive-keyring.asc
   register: gpg_key
 
 - name: Add Kubernetes Repository
-  become: yes
   ansible.builtin.apt_repository:
     repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.asc] https://apt.kubernetes.io/ kubernetes-xenial main"
     filename: /etc/apt/sources.list.d/kubernetes.list
@@ -68,12 +96,6 @@
   ansible.builtin.apt:
     name: "{{ kubernetes }}"
     state: present
-
-- name: Start and Enable the cri-dockerd service - containerd.service
-  ansible.builtin.systemd:
-    name: containerd.service
-    state: started
-    enabled: yes
 
 - name: Install network tools
   ansible.builtin.apt:

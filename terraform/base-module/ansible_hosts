@@ -2,17 +2,17 @@
 ansible_ssh_common_args='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 
 [control-plane-leader]
-      ip-10-0-1-78.ec2.internal ansible_host=10.0.1.78 # i-0d8fc9ccf4bbfc609
+      ip-10-0-1-176.ec2.internal ansible_host=10.0.1.176 # i-013ff88c92b47df88
       
 [control-plane-followers]
-        ip-10-0-2-228.ec2.internal ansible_host=10.0.2.228 # i-0744eb10039b30ed6
-        ip-10-0-3-110.ec2.internal ansible_host=10.0.3.110 # i-0428a5a4807d51215
+        ip-10-0-2-83.ec2.internal ansible_host=10.0.2.83 # i-022028045873782d9
+        ip-10-0-3-90.ec2.internal ansible_host=10.0.3.90 # i-0011c3064ca554459
   
 [control-plane:children]
 control-plane-leader
 control-plane-followers
 
 [workers]
-ip-10-0-1-136.ec2.internal ansible_host=10.0.1.136 # i-0cb1c28db6abe85f7
-ip-10-0-2-78.ec2.internal ansible_host=10.0.2.78 # i-02c5c64f684bef60d
-ip-10-0-3-217.ec2.internal ansible_host=10.0.3.217 # i-0807965b69b3e92fd
+ip-10-0-101-185.ec2.internal ansible_host=10.0.101.185 # i-098e45a6166aa98c8
+ip-10-0-102-125.ec2.internal ansible_host=10.0.102.125 # i-0b069e6ee552e0134
+ip-10-0-103-73.ec2.internal ansible_host=10.0.103.73 # i-025be461ce104a131

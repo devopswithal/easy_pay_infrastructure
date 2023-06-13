@@ -1,0 +1,86 @@
+- name: Make admin directory
+  ansible.builtin.file:
+    path: $HOME/admin/
+    state: directory
+
+- name: Generate an OpenSSL private key for cluster-admin
+  community.crypto.openssl_privatekey:
+    path: $HOME/admin/cluster-admin.key
+    size: 2048
+    backup: true
+    state: present
+    return_content: true
+  register: privatekey
+
+- name: Copy cluster-admin.key to local file
+  local_action:
+    module: ansible.builtin.copy
+    content: "{{ privatekey }}"
+    dest: ./cluster-admin.key
+
+- name: Generate an OpenSSL Certificate Signing Request for cluster-admin
+  community.crypto.openssl_csr:
+    path: $HOME/admin/cluster-admin.csr
+    privatekey_path: $HOME/admin/cluster-admin.key
+    country_name: US
+    state_or_province_name: TX
+    locality_name: Dallas
+    organization_name: cap-quotes-app
+    organizational_unit_name: cap-quotes-app
+    email_address: role@cap-quotes-app.com
+    common_name: cluster-admin
+    backup: true
+
+- name: Generate an OpenSSL certificate signed with your kubernetes CA certificate
+  community.crypto.x509_certificate:
+    path: $HOME/admin/cluster-admin.crt
+    csr_path: $HOME/admin/cluster-admin.csr
+    ownca_path: /etc/kubernetes/pki/ca.crt
+    ownca_privatekey_path: /etc/kubernetes/pki/ca.key
+    provider: ownca
+    state: present
+    return_content: true
+  register: certificate
+
+- name: Copy cluster-admin.crt to local file
+  local_action:
+    module: ansible.builtin.copy
+    content: "{{ certificate }}"
+    dest: ./cluster-admin.crt
+
+- name: Create namespace
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-namespaces.yml
+
+- name: Apply admin role
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-admin.yml -n cap-quotes-app
+
+- name: Apply admin rolebinding
+  ansible.builtin.shell:
+    cmd: kubectl apply -f $HOME/kubernetes/cap-quotes-admin-rb.yml -n cap-quotes-app
+
+- name: Setting credentials to the user
+  ansible.builtin.shell:
+    cmd: kubectl config set-credentials cluster-admin --client-certificate=$HOME/admin/cluster-admin.crt --client-key=$HOME/admin/cluster-admin.key
+
+- name: Set context to cluster-admin.
+  ansible.builtin.shell:
+    cmd: kubectl config set-context cluster-admin-context --cluster=kubernetes --namespace=cap-quotes-app --user=cluster-admin
+
+- name: Copy admin.conf to cluster-admin-conf
+  ansible.builtin.copy:
+    src: $HOME/.kube/config
+    dest: $HOME/admin/cluster-admin-conf
+    remote_src: true
+
+- name: Register cluster-admin-conf contents.
+  ansible.builtin.shell:
+    cmd: cat $HOME/admin/cluster-admin-conf
+  register: admin_conf
+
+- name: Copy cluster-admin-conf to local file
+  local_action:
+    module: ansible.builtin.copy
+    content: "{{ admin_conf.stdout_lines }}"
+    dest: ./cluster-admin-conf

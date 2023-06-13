@@ -2,20 +2,19 @@
 - name: Clone Mirantis/cri-dockerd repo
   ansible.builtin.git:
     repo: https://github.com/Mirantis/cri-dockerd.git
-    dest: /home/ubuntu/cri-dockerd
+    dest: $HOME/cri-dockerd
     single_branch: yes
     version: master
 
 - name: Download golang build tools
   ansible.builtin.get_url:
     url: https://storage.googleapis.com/golang/getgo/installer_linux
-    dest: /home/ubuntu/installer_linux
+    dest: $HOME/installer_linux
     mode: '0755'
 
 - name: Install GO
-  become: yes
   ansible.builtin.shell:
-    cmd: "/home/ubuntu/installer_linux && source /root/.bash_profile && go version"
+    cmd: "$HOME/installer_linux && source /root/.bash_profile && go version"
     executable: /bin/bash
   register: go_version_output
 
@@ -24,24 +23,21 @@
     var: go_version_output.stdout
 
 - name: Build cri-dockerd
-  become: yes
   shell:
-    cmd: "source /root/.bash_profile && cd /home/ubuntu/cri-dockerd && mkdir -p bin && go build -o bin/cri-dockerd"
+    cmd: "source /root/.bash_profile && cd $HOME/cri-dockerd && mkdir -p bin && go build -o bin/cri-dockerd"
     executable: /bin/bash
   args:
-    creates: /home/ubuntu/cri-dockerd/bin/cri-dockerd
+    creates: $HOME/cri-dockerd/bin/cri-dockerd
 
 - name: Create a /usr/local/bin directory if it does not exist
-  become: yes
   ansible.builtin.file:
     path: /usr/local/bin
     state: directory
     mode: '0755'
 
 - name: Install cri-dockerd binary in /usr/local/bin/ directory
-  become: yes
   ansible.builtin.copy:
-    src: /home/ubuntu/cri-dockerd/bin/cri-dockerd
+    src: $HOME/cri-dockerd/bin/cri-dockerd
     dest: /usr/local/bin/cri-dockerd
     remote_src: true
     owner: root
@@ -49,9 +45,8 @@
     mode: '0755'
 
 - name: Copy packaging/systemd/* to /etc/systemd/system directory
-  become: yes
   ansible.builtin.copy:
-    src: /home/ubuntu/cri-dockerd/packaging/systemd/{{ item }}
+    src: $HOME/cri-dockerd/packaging/systemd/{{ item }}
     dest: /etc/systemd/system/{{ item }}
     remote_src: true
   with_items:
@@ -59,27 +54,34 @@
     - cri-docker.socket
 
 - name: Configure systemd for cri-dockerd
-  become: yes
   ansible.builtin.replace:
     path: /etc/systemd/system/cri-docker.service
     regexp: "/usr/bin/cri-dockerd"
     replace: "/usr/local/bin/cri-dockerd"
 
 - name: Just force systemd to reread configs
-  become: yes
   ansible.builtin.systemd:
     daemon_reload: yes
 
 - name: Start and Enable the cri-dockerd service - cri-docker.service
-  become: yes
   ansible.builtin.systemd:
     name: cri-docker.service
     state: started
     enabled: yes
 
 - name: Start and Enable the cri-dockerd service - cri-docker.socket
-  become: yes
   ansible.builtin.systemd:
     name: cri-docker.socket
     state: started
     enabled: yes
+
+- name: restart docker
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+
+- name: restart kubelet
+  ansible.builtin.systemd:
+    name: kubelet
+    state: restarted
+

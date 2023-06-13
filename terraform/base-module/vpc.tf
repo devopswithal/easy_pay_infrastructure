@@ -13,6 +13,7 @@ module "vpc" {
 
   public_subnet_tags = {
     "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/kubernetes" = "owned"
   }
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = "1"
@@ -24,10 +25,14 @@ module "vpc" {
 
   enable_dns_support     = true
   enable_dns_hostnames   = true
+  private_subnet_enable_resource_name_dns_a_record_on_launch = true
+  public_subnet_enable_resource_name_dns_a_record_on_launch = true
 
   instance_tenancy = "default"
 
-  tags = local.common_tags
+  tags = {
+    "kubernetes.io/cluster/kubernetes" = "owned"
+  }
   vpc_tags = local.common_tags
 }
 
