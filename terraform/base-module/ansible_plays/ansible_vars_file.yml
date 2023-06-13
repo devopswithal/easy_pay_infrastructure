@@ -1,2 +1,0 @@
-control_plane_lb: control-plane-nlb-3fdd2530ef349518.elb.us-east-1.amazonaws.com
-control_plane_leader_ip: "10.0.1.176"
