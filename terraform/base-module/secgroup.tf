@@ -191,6 +191,13 @@ module "worker_node_sg" {
       protocol    = "tcp"
       cidr_blocks = var.vpc_cidr_block
     },
+    {
+      # AWS LB Controller
+      from_port   = 9443
+      to_port     = 9443
+      protocol    = "tcp"
+      cidr_blocks = var.vpc_cidr_block
+    },
   ]
   egress_with_cidr_blocks = [
     {

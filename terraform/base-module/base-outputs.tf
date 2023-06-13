@@ -54,12 +54,6 @@ output "ec2_bastion_public_ip" {
 ###############################################################
 # Cluster Outputs
 
-output "cluster_keypair" {
-  description = "Keypair for ssh access"
-  value = tls_private_key.ssh.private_key_pem
-  sensitive = true
-}
-
 output "cp_instances_one" {
   description = "Control plane instance attributes"
   value = aws_instance.control_instance[0].private_ip

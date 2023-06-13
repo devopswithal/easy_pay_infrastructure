@@ -8,17 +8,11 @@
     path: /home/ubuntu/ansible_plays/ansible_vars_file.yml
   register: ansible_vars_file
 
-- name: Add network elb dns name as c-plane-endpoint
-  ansible.builtin.replace:
-    path: $HOME/kubernetes/kubeconfig.yml
-    regexp: "controlPlaneEndpoint:"
-    replace: "controlPlaneEndpoint: {{ control_plane_lb }}:6443"
-
 ## sudo kubeadm init --config=$HOME/kubernetes/kubeconfig.yml --upload-certs --v=10>> control_plane.txt
 
 - name: Initialize cluster with kubeadm
   ansible.builtin.shell:
-    cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket unix:///run/containerd/containerd.sock --control-plane-endpoint {{ control_plane_lb }}:6443  --upload-certs --v=5>> control_plane.txt
+    cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket unix:///run/containerd/containerd.sock --control-plane-endpoint {{ control_plane_lb }}:6443  --upload-certs >> control_plane.txt
   register: result
   args:
     chdir: $HOME

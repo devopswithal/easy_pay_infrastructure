@@ -7,7 +7,7 @@ module "bastion_instance" {
   ami                    = var.ami_id
   instance_type          = var.bastion_instance
   subnet_id              = module.vpc.public_subnets[0]
-  vpc_security_group_ids = [module.ssh_sg.security_group_id, module.nginx_sg.security_group_id]
+  vpc_security_group_ids = [module.ssh_sg.security_group_id, module.alb_sg.security_group_id]
   key_name               = aws_key_pair.ep_ec2_key.key_name
   user_data              = <<-EOF
                             #!/bin/bash
@@ -33,7 +33,7 @@ resource "aws_instance" "control_instance" {
   instance_type              = var.cluster_instance
   subnet_id                  = element(module.vpc.private_subnets, count.index)
   key_name                   = aws_key_pair.ep_ec2_key.key_name
-  security_groups            = [module.ssh_sg.security_group_id, module.nginx_sg.security_group_id, module.control_plane_sg.security_group_id,module.cni_sg.security_group_id, module.database_sg.security_group_id]
+  security_groups            = [module.ssh_sg.security_group_id, module.alb_sg.security_group_id, module.control_plane_sg.security_group_id,module.cni_sg.security_group_id, module.database_sg.security_group_id]
   monitoring                 = true
 
   iam_instance_profile = aws_iam_instance_profile.control_plane_instance_profile.id
@@ -51,7 +51,7 @@ resource "aws_instance" "worker_instance" {
   instance_type              = var.cluster_instance
   subnet_id                  = element(module.vpc.public_subnets, count.index)
   key_name                   = aws_key_pair.ep_ec2_key.key_name
-  security_groups            = [module.ssh_sg.security_group_id, module.nginx_sg.security_group_id, module.worker_node_sg.security_group_id, module.cni_sg.security_group_id, module.database_sg.security_group_id]
+  security_groups            = [module.ssh_sg.security_group_id, module.alb_sg.security_group_id, module.worker_node_sg.security_group_id, module.cni_sg.security_group_id, module.database_sg.security_group_id]
   monitoring                 = true
 
   iam_instance_profile = aws_iam_instance_profile.worker_node_instance_profile.id

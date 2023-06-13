@@ -27,7 +27,6 @@
   roles:
     - tools_install
     - vm_setup
-    #- cri-dockerd_config
 ##
 
 ### Copy Kubernetes Manifest Files

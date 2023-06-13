@@ -7,7 +7,7 @@ data:
   mysql_usermgmt.sql: |-
     CREATE DATABASE quotes_database;
     USE quotes_database;
-    
+        
     CREATE TABLE quotes (
     quoteID int NOT NULL AUTO_INCREMENT,
     quote_string varchar(255),

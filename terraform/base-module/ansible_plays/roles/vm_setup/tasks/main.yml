@@ -29,7 +29,7 @@
     cmd: modprobe br_netfilter
 
 # sysctl params required by setup, params persist across reboots
-- name: Create k8s.conf file in sysctl directory
+- name: Turn on iptable bridge calls and ipv4 forwarding
   ansible.builtin.copy:
     content: |
       net.bridge.bridge-nf-call-iptables  = 1

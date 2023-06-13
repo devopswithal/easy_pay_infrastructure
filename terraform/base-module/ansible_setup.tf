@@ -39,6 +39,14 @@ resource "null_resource" "bastion_init" {
   }
 }
 
+# Create ansible variable file that contains control-plane lb dns
+resource "local_file" "ansible_vars_file" {
+  content = <<-DOC
+        control_plane_lb: ${aws_lb.control_plane_nlb.dns_name}
+        DOC
+  filename = "ansible_plays/ansible_vars_file.yml"
+}
+
 # Copy kubernetes manifest files over to bastion host
 resource "null_resource" "copy_k8s_manifests" {
   depends_on = [
@@ -93,15 +101,6 @@ resource "null_resource" "provisioner" {
   }
 }
 
-# Create ansible variable file that contains control-plane lb dns
-resource "local_file" "ansible_vars_file" {
-    content = <<-DOC
-        control_plane_lb: ${aws_lb.control_plane_nlb.dns_name}
-        control_plane_leader_ip: "${aws_instance.control_instance[0].private_ip}"
-        DOC
-    filename = "ansible_plays/ansible_vars_file.yml"
-}
-
 # Copy ansible playbooks over to bastion host
 resource "null_resource" "copy_ansible_playbooks" {
   depends_on = [
@@ -148,7 +147,7 @@ resource "null_resource" "run_ansible" {
     module.vpc,
   ]
   triggers = {
-    always_run        = timestamp()
+    "always_run"        = timestamp()
   }
 
   connection {
@@ -163,7 +162,7 @@ resource "null_resource" "run_ansible" {
   provisioner "remote-exec" {
     inline = [
       "echo 'starting ansible playbooks...'",
-      "sleep 60 && ansible-playbook -i /home/ubuntu/ansible_hosts /home/ubuntu/ansible_plays/cluster_config.yml -vvv",
+      "sleep 60 && ansible-playbook -i /home/ubuntu/ansible_hosts /home/ubuntu/ansible_plays/cluster_config.yml",
     ]
   }
 }
