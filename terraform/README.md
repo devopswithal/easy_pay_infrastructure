@@ -285,8 +285,8 @@ ep-vars.tf
 The vpc module requires a few different settings to make out AWS integration work. The basic VPC settings are the name, availability zones, cidr block, public subnets, and private subnets. The public subnets house the data plane which receives external access through the internet facing load balancer, and private subnets house the control-plane instances that manage the cluster. Each subnet must be tagged with "kubernetes.io/role/elb" = "1" and "kubernetes.io/cluster/<cluster name>" = "owned" to integrate with service load balancers. DNS support and hostnames must be enabled to resolve dns names. For cost savings, one NAT gateway for all availability zones will be provisioned. Included is also the elastic ip for the bastion host.
 
 - vpc.tf
-
-
+  
+  
       module "vpc" {
           source = "terraform-aws-modules/vpc/aws"
 
@@ -331,6 +331,7 @@ The vpc module requires a few different settings to make out AWS integration wor
           vpc      = true
           tags = local.common_tags
       }
+  
 The security groups are broken down into their functions: ssh, frontend, control-plane, data-plane, cni plugins, and database access. This allows modification of rules that only affect a subset of assets.
 
 - secgroups.tf
@@ -761,19 +762,19 @@ There are three types of instances created in this module: bastion host, control
       resource "aws_iam_role" "control_plane_iam_role" {
         name = "control-plane-iam-role"
         assume_role_policy = <<EOF
-      {
-        "Version": "2012-10-17",
-        "Statement": [
           {
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "ec2.amazonaws.com"
-            },
-            "Action": "sts:AssumeRole"
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "ec2.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
           }
-        ]
-      }
-      EOF
+          EOF
         tags = {
           "kubernetes.io/cluster/kubernetes" = "owned"
         }
@@ -782,33 +783,26 @@ There are three types of instances created in this module: bastion host, control
       resource "aws_iam_instance_profile" "control_plane_instance_profile" {
         name = "control-plane-instance-profile"
         role = aws_iam_role.control_plane_iam_role.name
-
         tags = {
           "kubernetes.io/cluster/kubernetes" = "owned"
         }
       }
 
       resource "aws_iam_role_policy_attachment" "ec2_policy_attachment" {
-
         policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
         role       = aws_iam_role.control_plane_iam_role.name
-
         depends_on = [aws_iam_role.control_plane_iam_role]
       }
 
       resource "aws_iam_role_policy_attachment" "elb_policy_attachment" {
-
         policy_arn = "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
         role       = aws_iam_role.control_plane_iam_role.name
-
         depends_on = [aws_iam_role.control_plane_iam_role]
       }
 
       resource "aws_iam_role_policy_attachment" "rds_policy_attachment" {
-
         policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
         role       = aws_iam_role.control_plane_iam_role.name
-
         depends_on = [aws_iam_role.control_plane_iam_role]
       }
 
@@ -817,19 +811,19 @@ There are three types of instances created in this module: bastion host, control
       resource "aws_iam_role" "worker_node_iam_role" {
         name = "worker-node-iam-role"
         assume_role_policy = <<EOF
-      {
-        "Version": "2012-10-17",
-        "Statement": [
           {
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "ec2.amazonaws.com"
-            },
-            "Action": "sts:AssumeRole"
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "ec2.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
           }
-        ]
-      }
-      EOF
+          EOF
         tags = {
           "kubernetes.io/cluster/kubernetes" = "owned"
         }
@@ -838,7 +832,6 @@ There are three types of instances created in this module: bastion host, control
       resource "aws_iam_instance_profile" "worker_node_instance_profile" {
         name = "worker-node-instance-profile"
         role = aws_iam_role.worker_node_iam_role.name
-
         tags = {
           "kubernetes.io/cluster/kubernetes" = "owned"
         }
@@ -867,17 +860,14 @@ There are three types of instances created in this module: bastion host, control
             }
           ]
         })
-
         tags = {
           "kubernetes.io/cluster/kubernetes" = "owned"
         }
       }
 
       resource "aws_iam_role_policy_attachment" "worker_policy_attachment" {
-
         policy_arn = aws_iam_policy.worker_policy.arn
         role       = aws_iam_role.worker_node_iam_role.name
-
         depends_on = [aws_iam_role.worker_node_iam_role]
       }
 
@@ -1288,7 +1278,7 @@ The ansible files are split into several roles. The first, installs required dep
         roles:
           - install_app
 
-  - tools_install
+- tools_install
 
 
       - name: Set hostnames
@@ -1395,7 +1385,7 @@ The ansible files are split into several roles. The first, installs required dep
           name: "{{ net }}"
           state: present
 
-
+  
 - vm_setup
 
 
@@ -1641,7 +1631,7 @@ Once these roles have been complete, roles that set up the cluster begin to run.
           content: "{{ node_join_command.stdout_lines[0] }}"
           dest: ./node_join_command
 
-  - control_plane_followers
+- control_plane_followers
 
 
       - name: Kubectl Install
