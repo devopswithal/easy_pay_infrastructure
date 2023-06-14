@@ -162,7 +162,7 @@ The backend.tfvars and provider files are used to connect to shared state store.
         }
       }
 
-ep-vars.tf
+- ep-vars.tf
 
 
       ################################################################################
@@ -755,7 +755,8 @@ There are three types of instances created in this module: bastion host, control
       }
 
   Each cluster instance has to have an IAM profile that attaches an IAM role with ec2, elb, and erc policies.
-  - iam.tf
+  
+- iam.tf
 
 
       Control Plane IAM Role and Policy
@@ -1918,18 +1919,18 @@ The mysql pod must be logged into to ensure connectivity, which will trigger con
 - Get the mysql pod name.
 
 
-    kubectl get pods -n cap-quotes-app -l app=mysql -o jsonpath='{.items[0].metadata.name}'
+      kubectl get pods -n cap-quotes-app -l app=mysql -o jsonpath='{.items[0].metadata.name}'
 
 - Log into the instance.
 
 
-    kubectl exec -it <mysql_pod_name> -n cap-quotes-app -- mysql -h mysql -u devopsadmin -pmypass123 quotes_database
+     kubectl exec -it <mysql_pod_name> -n cap-quotes-app -- mysql -h mysql -u devopsadmin -pmypass123 quotes_database
 
 ### Test ALB for App Instance.
 - Get the External IP for the cap-quotes-frontend service.
 
 
-     kubectl get svc -n cap-quotes-app`
+      kubectl get svc -n cap-quotes-app`
 - Go to \<alb dns>:80/quotes in any web browser.
 
 ### Test HPA.
@@ -1938,12 +1939,12 @@ The mysql pod must be logged into to ensure connectivity, which will trigger con
 - Watch the HPA for the app by running:
 
 
-    kubectl get hpa -n cap-quotes-app
+      kubectl get hpa -n cap-quotes-app
 
 - In a separate terminal run:
 
 
-    kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http:// <alb dns>:80/quotes; done"
+      kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http:// <alb dns>:80/quotes; done"
 
 ## F. ETCD Backup
 
@@ -1951,23 +1952,23 @@ The mysql pod must be logged into to ensure connectivity, which will trigger con
 - Get the etcd pod advertise-client-address
 
 
-    kubectl get pods -n kube-system
-    kubectl describe pods <etcd-pod-name> -n kube-system
+      kubectl get pods -n kube-system
+      kubectl describe pods <etcd-pod-name> -n kube-system
 
 - Export the advertise-client-address as a environment variable
 
 
-    export advertise_url=<<advertise-client-url>>
-    echo $advertise_url
+      export advertise_url=<<advertise-client-url>>
+      echo $advertise_url
 
 - Run the backup command
  
 
-    sudo ETCDCTL_API=3 etcdctl \
-    --endpoints $advertise_url \
-    --cacert /etc/kubernetes/pki/etcd/ca.crt \
-    --key /etc/kubernetes/pki/etcd/server.key \
-    --cert /etc/kubernetes/pki/etcd/server.crt snapshot etcd_backup.db       
+      sudo ETCDCTL_API=3 etcdctl \
+      --endpoints $advertise_url \
+      --cacert /etc/kubernetes/pki/etcd/ca.crt \
+      --key /etc/kubernetes/pki/etcd/server.key \
+      --cert /etc/kubernetes/pki/etcd/server.crt snapshot etcd_backup.db       
 
 ## G. Clean up.
 
