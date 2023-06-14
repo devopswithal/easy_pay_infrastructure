@@ -1952,7 +1952,37 @@ The mysql pod must be logged into to ensure connectivity, which will trigger con
 
     kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http:// <alb dns>:80/quotes; done"
 
-## F. Clean up.
+## F. ETCD Backup
+
+
+- Get the etcd pod advertise-client-address
+
+
+    kubectl get pods -n kube-system
+    kubectl describe pods <etcd-pod-name> -n kube-system
+
+- Export the advertise-client-address as a environment variable
+
+
+    export advertise_url=<<advertise-client-url>>
+    echo $advertise_url
+
+- Run the backup command
+ 
+
+    sudo ETCDCTL_API=3 etcdctl \
+    --endpoints $advertise_url \
+    --cacert /etc/kubernetes/pki/etcd/ca.crt \
+    --key /etc/kubernetes/pki/etcd/server.key \
+    --cert /etc/kubernetes/pki/etcd/server.crt snapshot etcd_backup.db       
+
+## G. Clean up.
+
+### Delete the cap-quotes-deployment to remove the elb for the app service
+
+
+    kubectl delete -f kubernetes/cap-quotes-app.yml -n cap-quotes-app
+
 ### Exit out of root, out of the control instance, and out of the bastion host.
 
 ### Destroy the infrastructure assets.
