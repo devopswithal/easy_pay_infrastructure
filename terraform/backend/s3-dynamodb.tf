@@ -2,7 +2,7 @@
 resource "aws_s3_bucket" "ep_cluster_state_store" {
   bucket = "ep-cluster-state-store"
 
-  tags = "local.common_tags"
+  tags = local.common_tags
 }
 
 resource "aws_s3_object" "terraform_state_store" {
