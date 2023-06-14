@@ -25,96 +25,96 @@ In this section, we will set up the backend which is where the shared ".tfstate"
 - provider.tf
 
 
-    terraform {
-      required_providers {
-        aws = {
-          source = "hashicorp/aws"
-          version = "4.66.0"
+      terraform {
+        required_providers {
+          aws = {
+            source = "hashicorp/aws"
+            version = "4.66.0"
+          }
         }
       }
-    }
     
-    provider "aws" {
-      profile = "terraform"
-      region  = var.aws_region
-    }
+      provider "aws" {
+        profile = "terraform"
+        region  = var.aws_region
+      }
     
 - ep-vars.tf
 
 
-    ################################################################################
-    # Business Operation and Ownership Variables
+      ################################################################################
+      Business Operation and Ownership Variables
     
-    # AWS Region
-    variable "aws_region" {
-      description = "Region in which AWS Resources to be created"
-      type = string
-      default = "us-east-1"
-    }
+      AWS Region
+      variable "aws_region" {
+        description = "Region in which AWS Resources to be created"
+        type = string
+        default = "us-east-1"
+      }
     
-    # Environment Variable
-    variable "environment" {
-      description = "Environment Variable"
-      type = string
-      default = "dev"
-    }
+      Environment Variable
+      variable "environment" {
+        description = "Environment Variable"
+        type = string
+        default = "dev"
+      }
     
-    # Business Division
-    variable "business_divsion" {
-      description = "Business Division who owns this Infrastructure"
-      type = string
-      default = "Sales"
-    }
+      Business Division
+      variable "business_divsion" {
+        description = "Business Division who owns this Infrastructure"
+        type = string
+        default = "Sales"
+      }
 - ep-local-vars.tf
 
 
-    # Business Variables For Local Use In Terraform
-    locals {
-      owners = var.business_divsion
-      environment = var.environment
-      name = "${local.owners}-${local.environment}"
-      common_tags = {
-        owners = local.owners
-        environment = local.environment
+      Business Variables For Local Use In Terraform
+      locals {
+        owners = var.business_divsion
+        environment = var.environment
+        name = "${local.owners}-${local.environment}"
+        common_tags = {
+          owners = local.owners
+          environment = local.environment
+        }
       }
-    }
     
 - s3dynamodb.tf
 
 
-    resource "aws_s3_bucket" "ep_cluster_state_store" {
-      bucket = "ep-cluster-state-store"
+      resource "aws_s3_bucket" "ep_cluster_state_store" {
+        bucket = "ep-cluster-state-store"
     
-      tags = "local.common_tags"
-    }
-    
-    resource "aws_s3_object" "terraform_state_store" {
-      bucket = "ep-cluster-state-store"
-      key    = "tfstate/"
-    
-      depends_on = [
-        aws_s3_bucket.ep_cluster_state_store
-      ]
-    }
-    
-    resource "aws_s3_bucket_versioning" "ep_state_versioning" {
-      bucket = aws_s3_bucket.ep_cluster_state_store.id
-      versioning_configuration {
-        status = "Enabled"
+        tags = "local.common_tags"
       }
-    }
     
-    resource "aws_dynamodb_table" "ep_cluster_state_lock" {
-      name           = "ep-cluster-state-lock"
-      read_capacity  = 5
-      write_capacity = 5
-      hash_key       = "LockID"
+      resource "aws_s3_object" "terraform_state_store" {
+        bucket = "ep-cluster-state-store"
+        key    = "tfstate/"
     
-      attribute {
-        name = "LockID"
-        type = "S"
+        depends_on = [
+          aws_s3_bucket.ep_cluster_state_store
+        ]
       }
-    }
+    
+      resource "aws_s3_bucket_versioning" "ep_state_versioning" {
+        bucket = aws_s3_bucket.ep_cluster_state_store.id
+        versioning_configuration {
+          status = "Enabled"
+        }
+      }
+    
+      resource "aws_dynamodb_table" "ep_cluster_state_lock" {
+        name           = "ep-cluster-state-lock"
+        read_capacity  = 5
+        write_capacity = 5
+        hash_key       = "LockID"
+    
+        attribute {
+          name = "LockID"
+          type = "S"
+        }
+      }
 
 ### Initialize, Plan, and Apply Backend 
 
@@ -132,35 +132,35 @@ The backend.tfvars and provider files are used to connect to shared state store.
 - backend.tfvars
 
 
-    bucket               = "ep-cluster-state-store"
-    key                  = "tfstate/terraform.tfstate"
-    region               = "us-east-1"
-    dynamodb_table       = "ep-cluster-state-lock"
+      bucket               = "ep-cluster-state-store"
+      key                  = "tfstate/terraform.tfstate"
+      region               = "us-east-1"
+      dynamodb_table       = "ep-cluster-state-lock"
 
 - provider.tf
 
 
-    provider "aws" {
-      profile = "terraform"
-      region  = var.aws_region
-    }
-    
-    terraform {
-      backend "s3" {
-        bucket = "ep-cluster-state-store"
-        key    = "tfstate/terraform.tfstate"
-        region = "us-east-1"
-        workspace_key_prefix = "environment"
-        dynamodb_table = "ep-eks-state-lock"
+      provider "aws" {
+        profile = "terraform"
+        region  = var.aws_region
       }
     
-      required_providers {
-        aws = {
-          source = "hashicorp/aws"
-          version = "5.2.0"
+      terraform {
+        backend "s3" {
+          bucket = "ep-cluster-state-store"
+          key    = "tfstate/terraform.tfstate"
+          region = "us-east-1"
+          workspace_key_prefix = "environment"
+          dynamodb_table = "ep-eks-state-lock"
+        }
+    
+        required_providers {
+          aws = {
+            source = "hashicorp/aws"
+            version = "5.2.0"
+          }
         }
       }
-    }
 
 ep-vars.tf
 
@@ -287,50 +287,50 @@ The vpc module requires a few different settings to make out AWS integration wor
 - vpc.tf
 
 
-    module "vpc" {
-        source = "terraform-aws-modules/vpc/aws"
-        
-        name          = var.vpc_name
-        cidr          = var.vpc_cidr_block
-        
-        enable_ipv6             = false
-        map_public_ip_on_launch = true
-        
-        azs               = var.vpc_azs
-        private_subnets   = var.vpc_private_subnets
-        public_subnets    = var.vpc_public_subnets
-        
-        public_subnet_tags = {
-        "kubernetes.io/role/elb" = "1"
-        "kubernetes.io/cluster/kubernetes" = "owned"
-        }
-        private_subnet_tags = {
-        "kubernetes.io/role/internal-elb" = "1"
-        }
-        
-        enable_nat_gateway     = var.vpc_enable_nat_gateway
-        single_nat_gateway     = var.vpc_single_nat_gateway
-        one_nat_gateway_per_az = var.vpc_one_nat_gateway_per_az
-        
-        enable_dns_support     = true
-        enable_dns_hostnames   = true
-        private_subnet_enable_resource_name_dns_a_record_on_launch = true
-        public_subnet_enable_resource_name_dns_a_record_on_launch = true
-        
-        instance_tenancy = "default"
-        
-        tags = {
-            "kubernetes.io/cluster/kubernetes" = "owned"
-        }
-        vpc_tags = local.common_tags
-    }
-    
-    resource "aws_eip" "bastion_eip" {
-        depends_on = [ module.bastion_instance, module.vpc ]
-        instance = module.bastion_instance.id
-        vpc      = true
-        tags = local.common_tags
-    }
+      module "vpc" {
+          source = "terraform-aws-modules/vpc/aws"
+
+          name          = var.vpc_name
+          cidr          = var.vpc_cidr_block
+
+          enable_ipv6             = false
+          map_public_ip_on_launch = true
+
+          azs               = var.vpc_azs
+          private_subnets   = var.vpc_private_subnets
+          public_subnets    = var.vpc_public_subnets
+
+          public_subnet_tags = {
+          "kubernetes.io/role/elb" = "1"
+          "kubernetes.io/cluster/kubernetes" = "owned"
+          }
+          private_subnet_tags = {
+          "kubernetes.io/role/internal-elb" = "1"
+          }
+
+          enable_nat_gateway     = var.vpc_enable_nat_gateway
+          single_nat_gateway     = var.vpc_single_nat_gateway
+          one_nat_gateway_per_az = var.vpc_one_nat_gateway_per_az
+
+          enable_dns_support     = true
+          enable_dns_hostnames   = true
+          private_subnet_enable_resource_name_dns_a_record_on_launch = true
+          public_subnet_enable_resource_name_dns_a_record_on_launch = true
+
+          instance_tenancy = "default"
+
+          tags = {
+              "kubernetes.io/cluster/kubernetes" = "owned"
+          }
+          vpc_tags = local.common_tags
+      }
+
+      resource "aws_eip" "bastion_eip" {
+          depends_on = [ module.bastion_instance, module.vpc ]
+          instance = module.bastion_instance.id
+          vpc      = true
+          tags = local.common_tags
+      }
 The security groups are broken down into their functions: ssh, frontend, control-plane, data-plane, cni plugins, and database access. This allows modification of rules that only affect a subset of assets.
 
 - secgroups.tf
