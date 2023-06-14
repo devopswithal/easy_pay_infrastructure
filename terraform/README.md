@@ -38,6 +38,7 @@ In this section, we will set up the backend which is where the shared ".tfstate"
       profile = "terraform"
       region  = var.aws_region
     }
+    
 - ep-vars.tf
 
 
@@ -77,6 +78,7 @@ In this section, we will set up the backend which is where the shared ".tfstate"
         environment = local.environment
       }
     }
+    
 - s3dynamodb.tf
 
 
