@@ -757,7 +757,7 @@ There are three types of instances created in this module: bastion host, control
   - iam.tf
 
 
-      #### Control Plane IAM Role and Policy
+      Control Plane IAM Role and Policy
       resource "aws_iam_role" "control_plane_iam_role" {
         name = "control-plane-iam-role"
         assume_role_policy = <<EOF
@@ -812,7 +812,7 @@ There are three types of instances created in this module: bastion host, control
         depends_on = [aws_iam_role.control_plane_iam_role]
       }
 
-      #### Worker Node IAM Role and Policy
+      Worker Node IAM Role and Policy
 
       resource "aws_iam_role" "worker_node_iam_role" {
         name = "worker-node-iam-role"
