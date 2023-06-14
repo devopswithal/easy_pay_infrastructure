@@ -9,7 +9,7 @@ spec:
       app: cap-quotes-frontend
       tier: frontend
       role: frontend
-  replicas: 3
+  replicas: 2
   template:
     metadata:
       labels:
@@ -20,7 +20,7 @@ spec:
       hostname: cap-quotes-app
       containers:
         - name: cap-quotes-frontend
-          image: devopswithal/cap-quotes-app:2.0
+          image: devopswithal/cap-quotes-app:3.0
           ports:
             - containerPort: 8080
           env:
